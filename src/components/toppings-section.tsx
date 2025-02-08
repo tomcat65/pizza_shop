@@ -19,6 +19,7 @@ type Item = Database['public']['Tables']['items']['Row'] & {
 interface ToppingsSectionProps {
   item: Item
   selectedSize: ItemSize
+  onToppingsChange: (toppings: { topping: Topping; isGrilled?: boolean }[]) => void
 }
 
 type SelectedTopping = {
@@ -29,7 +30,7 @@ type SelectedTopping = {
 // Create a single Supabase client instance
 const supabase = createClient()
 
-export default function ToppingsSection({ item, selectedSize }: ToppingsSectionProps) {
+export default function ToppingsSection({ item, selectedSize, onToppingsChange }: ToppingsSectionProps) {
   console.log('ToppingsSection initializing with item:', {
     id: item.id,
     name: item.name,
@@ -53,6 +54,11 @@ export default function ToppingsSection({ item, selectedSize }: ToppingsSectionP
     
     setTotalPrice(basePrice + toppingsPrice)
   }, [selectedToppings, selectedSize, item.base_price])
+
+  // Notify parent of toppings changes
+  useEffect(() => {
+    onToppingsChange(selectedToppings)
+  }, [selectedToppings, onToppingsChange])
 
   // Toppings initialization effect
   useEffect(() => {

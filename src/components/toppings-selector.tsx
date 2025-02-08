@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Database } from "@/lib/supabase/database.types";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -27,9 +27,6 @@ export function ToppingsSelector({
   >([]);
   const [openCategory, setOpenCategory] = useState<ToppingCategory | null>(null);
 
-  console.log('Received toppings:', toppings);
-  console.log('Item type:', itemType);
-
   const getPriceMultiplier = (size: string) => {
     switch (size) {
       case 'Personal (10")':
@@ -43,17 +40,18 @@ export function ToppingsSelector({
 
   const priceMultiplier = getPriceMultiplier(size);
 
+  // Use useEffect to notify parent of changes
+  useEffect(() => {
+    onToppingsChange(selectedToppings);
+  }, [selectedToppings, onToppingsChange]);
+
   const handleToppingToggle = (topping: Topping, isGrilled?: boolean) => {
     setSelectedToppings((prev) => {
       const exists = prev.find((t) => t.topping.id === topping.id);
       if (exists) {
-        const filtered = prev.filter((t) => t.topping.id !== topping.id);
-        onToppingsChange(filtered);
-        return filtered;
+        return prev.filter((t) => t.topping.id !== topping.id);
       }
-      const newToppings = [...prev, { topping, isGrilled }];
-      onToppingsChange(newToppings);
-      return newToppings;
+      return [...prev, { topping, isGrilled }];
     });
   };
 
@@ -67,12 +65,7 @@ export function ToppingsSelector({
     { cheese: [], meat: [], veggie: [] } as Record<ToppingCategory, Topping[]>
   );
 
-  console.log('Grouped toppings:', groupedToppings);
-
   const renderToppings = (category: ToppingCategory) => {
-    console.log('Rendering category:', category, 'isOpen:', openCategory === category);
-    console.log('Toppings for category:', groupedToppings[category]);
-
     if (openCategory !== category) return null;
 
     return (

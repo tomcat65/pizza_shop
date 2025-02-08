@@ -20,11 +20,13 @@ type Item = Database['public']['Tables']['items']['Row'] & {
 
 interface Props {
   params: Promise<{ id: string }> | { id: string }
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }> | { [key: string]: string | string[] | undefined }
 }
 
 export default async function MenuItemPage({ params, searchParams }: Props) {
+  // Await both params and searchParams
   const resolvedParams = await params
+  const resolvedSearchParams = await searchParams
   const id = resolvedParams.id
 
   if (!id) {
@@ -33,7 +35,7 @@ export default async function MenuItemPage({ params, searchParams }: Props) {
   }
 
   console.log('Page params:', { id })
-  console.log('Search params:', searchParams)
+  console.log('Search params:', resolvedSearchParams)
 
   const supabase = createClient()
   
@@ -148,9 +150,10 @@ export default async function MenuItemPage({ params, searchParams }: Props) {
       notFound()
     }
 
-    // If no size is selected, use the first available size
-    const selectedSize = searchParams?.size 
-      ? item.sizes.find((size: ItemSize) => size.id === searchParams.size)
+    // Get the selected size from searchParams or default to first size
+    const sizeId = resolvedSearchParams?.size as string | undefined
+    const selectedSize = sizeId
+      ? item.sizes.find(size => size.id === sizeId)
       : item.sizes[0]
     
     if (!selectedSize) {

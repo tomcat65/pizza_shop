@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import type { Database } from "@/lib/supabase/database.types"
 import ToppingsSection from "./toppings-section"
+import { useCartStore } from "@/lib/store/cart"
+import { toast } from "sonner"
 
 type ItemSize = Database['public']['Tables']['item_sizes']['Row']
 type Item = Database['public']['Tables']['items']['Row'] & {
@@ -18,10 +20,26 @@ interface MenuItemContentProps {
 
 export function MenuItemContent({ item, selectedSize }: MenuItemContentProps) {
   const [isClient, setIsClient] = useState(false)
+  const [selectedToppings, setSelectedToppings] = useState<any[]>([])
+  const [specialInstructions, setSpecialInstructions] = useState("")
+  const addItem = useCartStore((state) => state.addItem)
 
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  const handleAddToCart = () => {
+    addItem({
+      itemId: item.id,
+      name: item.name,
+      size: selectedSize,
+      basePrice: item.base_price,
+      toppings: selectedToppings,
+      quantity: 1,
+      specialInstructions
+    })
+    toast.success("Added to cart!")
+  }
 
   if (!isClient) {
     return (
@@ -86,11 +104,33 @@ export function MenuItemContent({ item, selectedSize }: MenuItemContentProps) {
         )}
 
         {/* Toppings Section */}
-        <ToppingsSection item={item} selectedSize={selectedSize} />
+        <ToppingsSection 
+          item={item} 
+          selectedSize={selectedSize} 
+          onToppingsChange={setSelectedToppings}
+        />
+
+        {/* Special Instructions */}
+        <div className="mt-8">
+          <label htmlFor="special-instructions" className="block text-sm font-medium text-gray-700">
+            Special Instructions
+          </label>
+          <textarea
+            id="special-instructions"
+            rows={3}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+            placeholder="Any special requests? (Optional)"
+            value={specialInstructions}
+            onChange={(e) => setSpecialInstructions(e.target.value)}
+          />
+        </div>
 
         {/* Add to Cart Button */}
         <div className="mt-8 sticky bottom-4">
-          <button className="w-full bg-orange-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-orange-600 transition-colors">
+          <button
+            onClick={handleAddToCart}
+            className="w-full bg-orange-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-orange-600 transition-colors"
+          >
             Add to Cart
           </button>
         </div>
