@@ -2,7 +2,7 @@
 
 import { useCartStore } from '@/lib/store/cart'
 import { useUIStore } from '@/lib/store/ui'
-import { ShoppingCart } from 'lucide-react'
+import { Menu, X, ShoppingCart } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 
 export function MainNav() {
   const [mounted, setMounted] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
   const { items } = useCartStore()
   const { openCart } = useUIStore()
@@ -34,6 +35,10 @@ export function MainNav() {
     }
   }
 
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen)
+  }
+
   if (!mounted) return null
 
   return (
@@ -41,20 +46,35 @@ export function MainNav() {
       <div className="philly-container">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="philly-nav-link font-bold">
-            Philly Pizza
+          <Link href="/" className="philly-nav-link font-bold text-xl">
+            PhillyPizzaBueno
           </Link>
 
-          {/* Navigation Links */}
-          <div className="flex items-center gap-4">
-            <Link
-              href="/menu"
-              className={`philly-nav-link ${
-                pathname === '/menu' ? 'text-philly-green' : ''
-              }`}
+          {/* Mobile menu button */}
+          <div className="flex md:hidden">
+            <button
+              onClick={toggleMenu}
+              className="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-philly-silver-200 hover:bg-philly-green-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
             >
-              Menu
-            </Link>
+              <span className="sr-only">Open main menu</span>
+              {isMenuOpen ? (
+                <X className="block h-6 w-6" aria-hidden="true" />
+              ) : (
+                <Menu className="block h-6 w-6" aria-hidden="true" />
+              )}
+            </button>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex md:items-center md:space-x-4">
+            {/* Menu Categories */}
+            <div className="flex items-center space-x-4">
+              <span className="philly-nav-link cursor-not-allowed opacity-70">Pizza</span>
+              <span className="philly-nav-link cursor-not-allowed opacity-70">Wings</span>
+              <span className="philly-nav-link cursor-not-allowed opacity-70">Cheesesteaks</span>
+              <span className="philly-nav-link cursor-not-allowed opacity-70">Sides</span>
+              <span className="philly-nav-link cursor-not-allowed opacity-70">Drinks</span>
+            </div>
 
             {/* Cart indicator */}
             <div className="relative">
@@ -70,6 +90,17 @@ export function MainNav() {
                 )}
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        <div className={`md:hidden ${isMenuOpen ? "block" : "hidden"}`}>
+          <div className="space-y-1 px-2 pb-3 pt-2">
+            <span className="block philly-nav-link cursor-not-allowed opacity-70">Pizza</span>
+            <span className="block philly-nav-link cursor-not-allowed opacity-70">Wings</span>
+            <span className="block philly-nav-link cursor-not-allowed opacity-70">Cheesesteaks</span>
+            <span className="block philly-nav-link cursor-not-allowed opacity-70">Sides</span>
+            <span className="block philly-nav-link cursor-not-allowed opacity-70">Drinks</span>
           </div>
         </div>
       </div>

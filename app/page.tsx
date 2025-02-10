@@ -146,10 +146,7 @@ export default async function Page() {
                       {item.sizes?.map((size: ItemSize) => (
                         <Link
                           key={size.id}
-                          href={{
-                            pathname: `/menu/${item.id}`,
-                            query: { size: size.id }
-                          }}
+                          href={`/pizza_menu/${item.id}?size=${size.id}`}
                           className="flex items-center justify-between p-2 rounded hover:bg-philly-green-50 transition-colors group"
                         >
                           <div className="flex items-center gap-2">
