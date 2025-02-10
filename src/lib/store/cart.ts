@@ -16,17 +16,21 @@ export const useCartStore = create<CartState>((set) => ({
       items: [...state.items, {
         ...item,
         id: crypto.randomUUID(),
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        toppings: item.toppings.map(topping => ({
+          ...topping,
+          name: topping.name.startsWith('XTRA-') ? topping.name : topping.name + (topping.isGrilled ? ' (Grilled)' : '')
+        }))
       }]
     })),
   removeItem: (itemId) =>
     set((state) => ({
-      items: state.items.filter((item) => item.itemId !== itemId)
+      items: state.items.filter((item) => item.id !== itemId)
     })),
   updateQuantity: (itemId, quantity) =>
     set((state) => ({
       items: state.items.map((item) =>
-        item.itemId === itemId ? { ...item, quantity } : item
+        item.id === itemId ? { ...item, quantity } : item
       )
     })),
   clearCart: () => set({ items: [] })

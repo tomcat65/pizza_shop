@@ -9,6 +9,8 @@ export interface Topping {
   category: string
   active: boolean
   created_at: string
+  isGrilled?: boolean
+  veggie_state?: 'grilled' | 'natural' | 'both'
 }
 
 export interface CartItem {

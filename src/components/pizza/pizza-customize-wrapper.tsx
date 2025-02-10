@@ -1,7 +1,7 @@
 'use client'
 
 import type { Database } from "@/lib/supabase/database.types"
-import { PizzaCustomizeForm } from "./pizza-customize-form"
+import PizzaCustomizeForm from "./pizza-customize-form"
 import { useCartStore } from "@/lib/store/cart"
 import { useUIStore } from "@/lib/store/ui"
 import { toast } from "sonner"
@@ -13,7 +13,7 @@ import { DatabaseTopping } from '@/lib/types/cart'
 
 interface PizzaCustomizeWrapperProps {
   toppings: DatabaseTopping[]
-  defaultToppingIds: string[]
+  defaultToppingIds: Array<{ id: string; isGrilled: boolean | null }>
   itemType: "pizza" | "cheesesteak"
   size: "Personal (10\")" | "Regular (12\")" | "Family (17\")"
   itemName: string
@@ -40,13 +40,14 @@ export default function PizzaCustomizeWrapper({
       name: itemName,
       size,
       basePrice,
-      toppings: selectedToppings.map(({ topping }) => ({
+      toppings: selectedToppings.map(({ topping, isGrilled }) => ({
         id: topping.id,
-        name: defaultToppingIds.includes(topping.id) ? `XTRA-${topping.name}` : topping.name,
+        name: defaultToppingIds.some(dt => dt.id === topping.id) ? `XTRA-${topping.name}` : topping.name,
         price: topping.price,
         category: topping.category,
         active: true,
-        created_at: topping.created_at
+        created_at: topping.created_at,
+        isGrilled
       })),
       quantity: 1,
       specialInstructions: '',
@@ -86,7 +87,7 @@ export default function PizzaCustomizeWrapper({
           itemType={itemType}
           size={size}
           itemName={itemName}
-          onAddToCart={handleAddToCart}
+          onSubmit={handleAddToCart}
         />
       </main>
       

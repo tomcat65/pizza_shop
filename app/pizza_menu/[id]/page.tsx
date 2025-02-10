@@ -6,31 +6,38 @@ import { Topping } from "@/lib/types/cart"
 type ItemSize = Database['public']['Tables']['item_sizes']['Row']
 type DatabaseTopping = Database['public']['Tables']['toppings']['Row']
 type DatabaseItem = Database['public']['Tables']['items']['Row']
+type ItemAvailableTopping = Database['public']['Tables']['item_available_toppings']['Row'] & {
+  topping: DatabaseTopping
+}
 
 type Item = Omit<DatabaseItem, 'active'> & {
   active: boolean
   category: { name: string }
   sizes: ItemSize[]
-  available_toppings: { topping: Topping }[]
+  available_toppings: ItemAvailableTopping[]
+}
+
+interface PageProps {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ size?: string }>
 }
 
 export default async function PizzaCustomizePage({ 
   params,
   searchParams 
-}: { 
-  params: { id: string }
-  searchParams: { size?: string }
-}) {
+}: PageProps) {
   const supabase = createClient()
+  const { id } = await params
+  const { size: selectedSizeId } = await searchParams
 
-  // Fetch the pizza item
+  // Fetch the pizza item with its default toppings
   const { data: item, error: itemError } = await supabase
     .from('items')
     .select(`
       *,
       category:categories(name)
     `)
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (itemError || !item || !item.category) {
@@ -51,7 +58,7 @@ export default async function PizzaCustomizePage({
   const { data: rawSizes = [], error: sizesError } = await supabase
     .from('item_sizes')
     .select('*')
-    .eq('item_id', params.id)
+    .eq('item_id', id)
 
   if (sizesError) {
     console.error('Error fetching sizes:', sizesError)
@@ -71,39 +78,27 @@ export default async function PizzaCustomizePage({
   const sizes = rawSizes ?? []
 
   // Find the selected size from the URL parameter
-  const selectedSize = sizes.find(size => size.id === searchParams.size) || sizes[0]
+  const selectedSize = sizes.find(size => size.id === selectedSizeId) || sizes[0]
 
-  // Fetch default toppings for this item
-  const { data: defaultToppings = [], error: defaultToppingsError } = await supabase
-    .from('item_available_toppings')
-    .select(`
-      *,
-      topping:toppings(*)
-    `)
-    .eq('item_id', params.id)
+  // Fetch all active toppings and default toppings for this item
+  const [toppingsResult, defaultToppingsResult] = await Promise.all([
+    supabase
+      .from('toppings')
+      .select('*')
+      .eq('active', true)
+      .in('item_type', ['pizza', 'both']),
+    supabase
+      .from('item_available_toppings')
+      .select(`
+        *,
+        topping:toppings(*)
+      `)
+      .eq('item_id', id)
+      .eq('is_default', true)
+  ])
 
-  if (defaultToppingsError) {
-    console.error('Error fetching default toppings:', defaultToppingsError)
-    return (
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h1 className="text-2xl font-semibold text-red-600">Error</h1>
-            <p className="mt-2">Failed to load pizza toppings. Please try again later.</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Fetch all active toppings
-  const { data: rawToppings = [], error: toppingsError } = await supabase
-    .from('toppings')
-    .select('*')
-    .eq('active', true)
-
-  if (toppingsError) {
-    console.error('Error fetching toppings:', toppingsError)
+  if (toppingsResult.error) {
+    console.error('Error fetching toppings:', toppingsResult.error)
     return (
       <div className="min-h-screen bg-gray-50 p-4">
         <div className="max-w-4xl mx-auto">
@@ -116,8 +111,22 @@ export default async function PizzaCustomizePage({
     )
   }
 
+  if (defaultToppingsResult.error) {
+    console.error('Error fetching default toppings:', defaultToppingsResult.error)
+    return (
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h1 className="text-2xl font-semibold text-red-600">Error</h1>
+            <p className="mt-2">Failed to load default toppings. Please try again later.</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // Ensure toppings is not null and filter active ones
-  const toppings = rawToppings ?? []
+  const toppings = toppingsResult.data ?? []
   const activeToppings = toppings
     .filter((topping): topping is DatabaseTopping => 
       topping.active === true && 
@@ -126,8 +135,12 @@ export default async function PizzaCustomizePage({
       typeof topping.category === 'string'
     )
 
-  // Get the default topping IDs
-  const defaultToppingIds = (defaultToppings ?? []).map(dt => dt.topping_id)
+  // Get the default toppings
+  const defaultToppingIds = (defaultToppingsResult.data ?? [])
+    .map(dt => ({
+      id: dt.topping.id,
+      isGrilled: dt.is_grilled
+    }))
 
   return (
     <PizzaCustomizeWrapper 
