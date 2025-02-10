@@ -5,6 +5,7 @@ import { ToppingsSelector } from "./toppings-selector"
 import type { Database } from "@/lib/supabase/database.types"
 import { createClient } from "@/lib/supabase/client"
 
+
 type ItemSize = Database['public']['Tables']['item_sizes']['Row']
 type Topping = Database['public']['Tables']['toppings']['Row']
 type AvailableTopping = {

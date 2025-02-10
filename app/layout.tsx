@@ -3,12 +3,13 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { CartDrawer } from "@/components/cart/cart-drawer"
 import { Toaster } from "sonner"
+import { Footer } from "@/components/layout/footer"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Online Food Store",
-  description: "Great food, affordable prices",
+  title: "PhillyPizzaBueno Store",
+  description: "Great Philly style pizza and much more @affordable prices",
 }
 
 export default function RootLayout({
@@ -18,10 +19,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning className={inter.className}>
+      <body suppressHydrationWarning className={`${inter.className} min-h-screen flex flex-col`}>
         {children}
+        <Footer />
         <CartDrawer />
-        <Toaster position="top-center" />
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   )

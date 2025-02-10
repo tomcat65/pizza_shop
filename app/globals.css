@@ -1,3 +1,155 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities; 
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+ 
+    --primary: 186 100% 16.5%;
+    --primary-foreground: 210 40% 98%;
+ 
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+ 
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+ 
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+ 
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.philly-gradient {
+  @apply bg-gradient-to-br from-philly-green via-philly-blue to-philly-red;
+}
+
+.philly-text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-philly-green to-philly-blue;
+}
+
+.philly-button {
+  @apply bg-philly-green hover:bg-philly-green-600 text-white font-bold py-2 px-4 rounded-lg 
+         transition-all duration-200 ease-in-out shadow-lg hover:shadow-xl
+         focus:outline-none focus:ring-2 focus:ring-philly-green-400 focus:ring-opacity-50;
+}
+
+.philly-card {
+  @apply bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200
+         border border-philly-silver-200 hover:border-philly-green-300;
+}
+
+.philly-input {
+  @apply border-2 border-philly-silver-300 rounded-lg px-4 py-2
+         focus:border-philly-green-400 focus:ring-2 focus:ring-philly-green-200 focus:outline-none
+         transition-all duration-200 ease-in-out;
+}
+
+.philly-link {
+  @apply text-philly-blue hover:text-philly-blue-600 transition-colors duration-200;
+}
+
+/* Mobile-first responsive classes */
+.philly-container {
+  @apply w-full px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl;
+}
+
+.philly-grid {
+  @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+/* Navigation styles */
+.philly-nav {
+  @apply bg-philly-green text-white shadow-lg;
+}
+
+.philly-nav-link {
+  @apply text-white hover:text-philly-silver-200 transition-colors duration-200
+         px-3 py-2 rounded-md text-sm font-medium;
+}
+
+/* Form styles */
+.philly-form-group {
+  @apply space-y-2;
+}
+
+.philly-label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+.philly-select {
+  @apply philly-input block w-full;
+}
+
+.philly-checkbox {
+  @apply rounded border-philly-silver-300 text-philly-green focus:ring-philly-green-400;
+}
+
+/* Button variations */
+.philly-button-secondary {
+  @apply bg-philly-silver hover:bg-philly-silver-600 text-philly-green-900 philly-button;
+}
+
+.philly-button-accent {
+  @apply bg-philly-red hover:bg-philly-red-600 text-white philly-button;
+}
+
+/* Toast styling */
+.philly-toast {
+  @apply rounded-full !important;
+} 
