@@ -80,34 +80,36 @@ export default async function Page() {
         <MainNav />
         
         {/* Hero Section */}
-        <div className="relative overflow-hidden">
+        <div className="relative overflow-hidden h-[300px] sm:h-[400px]">
           {/* Background Image */}
           <div 
             className="absolute inset-0 opacity-60"
             style={{
               backgroundImage: 'url(https://sovfgykechixokxewvnp.supabase.co/storage/v1/object/public/menu_items_images/page_assets/3-Cheese.gif)',
-              backgroundSize: 'cover',
+              backgroundSize: '200% auto',
               backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
+              transform: 'scale(1.1)',
             }}
           />
           
           {/* Content */}
-          <div className="relative philly-container py-16 sm:py-24">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold tracking-tight sm:text-6xl mb-8 philly-text-gradient">
-                Craft Your Perfect Pizza
-              </h1>
-              <Link href="/menu" className="philly-button inline-flex items-center gap-2">
-                <Image 
-                  src="/images/chef_hat_moustache.svg"
-                  alt="Chef"
-                  width={24}
-                  height={24}
-                  className="w-6 h-6"
-                />
-                Customize Your Pizza
-              </Link>
+          <div className="relative h-full flex items-center">
+            <div className="philly-container">
+              <div className="text-center">
+                <h1 className="text-4xl font-bold tracking-tight sm:text-6xl mb-8 philly-text-gradient">
+                  Craft Your Perfect Pizza
+                </h1>
+                <Link href="/menu" className="philly-button inline-flex items-center gap-2">
+                  <Image 
+                    src="/images/chef_hat_moustache.svg"
+                    alt="Chef"
+                    width={24}
+                    height={24}
+                    className="w-6 h-6"
+                  />
+                  Customize Your Pizza
+                </Link>
+              </div>
             </div>
           </div>
         </div>
