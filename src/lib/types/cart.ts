@@ -14,22 +14,33 @@ export interface Topping {
 }
 
 export interface CartItem {
-  id: string
+  cartId: string  // Unique identifier for cart items
   itemId: string
   name: string
-  size: string
   basePrice: number
-  toppings: Topping[]
+  size: {
+    id: string
+    name: string
+    price_adjustment: number
+  }
   quantity: number
+  toppings: Array<{
+    id: string
+    name: string
+    price: number
+    isGrilled?: boolean
+  }>
   specialInstructions?: string
-  crustType: string
-  createdAt: string
+  crustType?: 'thin' | 'regular' | 'thick'
 }
 
 export interface CartState {
-  items: CartItem[]
-  addItem: (item: Omit<CartItem, 'id' | 'createdAt'>) => void
-  removeItem: (id: string) => void
-  updateItemQuantity: (id: string, quantity: number) => void
+  cartItems: CartItem[]
+  addToCart: (item: CartItem) => void
+  removeFromCart: (id: string) => void
+  updateQuantity: (id: string, quantity: number) => void
   clearCart: () => void
+  isOpen: boolean
+  toggleCart: () => void
+  getTotalPrice: () => number
 } 

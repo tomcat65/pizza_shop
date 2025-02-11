@@ -9,13 +9,31 @@ import { useEffect, useState } from "react";
 import { Menu, X, ShoppingCart } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useUIStore } from "@/lib/store/ui";
+import { toast } from "sonner";
+
+function useHydratedStore() {
+  const [mounted, setMounted] = useState(false);
+  const cartItems = useCartStore((state) => state?.cartItems ?? []);
+  const toggleCart = useUIStore((state) => state?.toggleCart);
+
+  useEffect(() => {
+    setMounted(true);
+    useCartStore.persist.rehydrate();
+  }, []);
+
+  return {
+    cartItems: mounted ? cartItems : [],
+    toggleCart: mounted ? toggleCart : () => {},
+    mounted
+  };
+}
 
 export function MainNav() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const cartItems = useCartStore((state) => state.items);
-  const { toggleCart } = useUIStore();
+  const [user, setUser] = useState<Database['auth']['Tables']['users']['Row'] | null>(null);
+  const { cartItems, toggleCart, mounted } = useHydratedStore();
+
   const supabase = createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -31,13 +49,21 @@ export function MainNav() {
     getUser();
   }, [supabase.auth]);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-  };
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+  const handleCartClick = () => {
+    if (!mounted) return;
+    
+    toggleCart?.();
+    if (cartItems?.length > 0) {
+      toast.message(`${cartItems.length} item${cartItems.length === 1 ? '' : 's'} in cart`, {
+        className: "philly-toast",
+        style: {
+          backgroundColor: "#004C54",
+          color: "white",
+          border: "none",
+        },
+        position: "bottom-center",
+      });
+    }
   };
 
   return (
@@ -63,7 +89,7 @@ export function MainNav() {
           {/* Mobile menu button */}
           <div className="flex md:hidden">
             <button
-              onClick={toggleMenu}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-philly-silver-200 hover:bg-philly-green-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
             >
               <span className="sr-only">Open main menu</span>
@@ -96,7 +122,10 @@ export function MainNav() {
                   Orders
                 </Link>
                 <button
-                  onClick={signOut}
+                  onClick={() => {
+                    supabase.auth.signOut();
+                    setUser(null);
+                  }}
                   className="philly-nav-link"
                 >
                   Sign Out
@@ -114,11 +143,11 @@ export function MainNav() {
             {/* Cart indicator */}
             <div className="relative">
               <button 
-                onClick={toggleCart}
+                onClick={handleCartClick}
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
               >
                 <ShoppingCart className="h-5 w-5" />
-                {cartItems.length > 0 && (
+                {mounted && cartItems?.length > 0 && (
                   <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-philly-red text-xs font-bold text-white">
                     {cartItems.length}
                   </span>
@@ -153,7 +182,8 @@ export function MainNav() {
                 </Link>
                 <button
                   onClick={() => {
-                    signOut();
+                    supabase.auth.signOut();
+                    setUser(null);
                     setIsMenuOpen(false);
                   }}
                   className="block w-full text-left philly-nav-link"

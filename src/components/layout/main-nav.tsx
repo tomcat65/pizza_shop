@@ -8,22 +8,33 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-export function MainNav() {
-  const [mounted, setMounted] = useState(false)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const pathname = usePathname()
-  const { items } = useCartStore()
-  const { openCart } = useUIStore()
+function useHydratedStore() {
+  const [hydrated, setHydrated] = useState(false)
+  const items = useCartStore((state) => state?.cartItems ?? [])
+  const toggleCart = useUIStore((state) => state?.toggleCart)
 
-  // Hydration fix
   useEffect(() => {
-    setMounted(true)
+    setHydrated(true)
   }, [])
 
+  return {
+    cartItems: hydrated ? items : [],
+    toggleCart: hydrated ? toggleCart : () => {},
+    hydrated
+  }
+}
+
+export function MainNav() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const pathname = usePathname()
+  const { cartItems, toggleCart, hydrated } = useHydratedStore()
+
   const handleCartClick = () => {
-    openCart()
-    if (items.length > 0) {
-      toast.message(`${items.length} item${items.length === 1 ? '' : 's'} in cart`, {
+    if (!hydrated) return
+    
+    toggleCart?.()
+    if (cartItems?.length > 0) {
+      toast.message(`${cartItems.length} item${cartItems.length === 1 ? '' : 's'} in cart`, {
         className: "philly-toast",
         style: {
           backgroundColor: "#004C54",
@@ -38,8 +49,6 @@ export function MainNav() {
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
   }
-
-  if (!mounted) return null
 
   return (
     <nav className="philly-nav sticky top-0 z-50">
@@ -83,9 +92,9 @@ export function MainNav() {
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
               >
                 <ShoppingCart className="h-5 w-5" />
-                {items.length > 0 && (
+                {hydrated && cartItems?.length > 0 && (
                   <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-philly-red text-xs font-bold text-white">
-                    {items.length}
+                    {cartItems.length}
                   </span>
                 )}
               </button>

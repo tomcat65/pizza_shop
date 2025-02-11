@@ -8,13 +8,10 @@ import { formatPrice } from '@/lib/utils'
 import { ShoppingBag } from 'lucide-react'
 
 export function CartList() {
-  const items = useCartStore((state) => state.items)
-  const totalPrice = items.reduce((acc, item) => {
-    const itemTotal = item.basePrice + item.toppings.reduce((sum, topping) => sum + topping.price, 0)
-    return acc + (itemTotal * item.quantity)
-  }, 0)
+  const { cartItems, getTotalPrice } = useCartStore()
+  const totalPrice = getTotalPrice()
 
-  if (items.length === 0) {
+  if (!cartItems?.length) {
     return (
       <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border-2 border-dashed">
         <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
@@ -32,8 +29,8 @@ export function CartList() {
     <div className="flex h-[450px] flex-col">
       <ScrollArea className="flex-1">
         <div className="flex flex-col gap-4 p-4">
-          {items.map((item, index) => (
-            <CartListItem key={`${item.itemId}-${index}`} item={item} />
+          {cartItems.map((item) => (
+            <CartListItem key={item.cartId} item={item} />
           ))}
         </div>
       </ScrollArea>
